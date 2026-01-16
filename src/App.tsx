@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import GazePortrait from './components/GazePortrait'
 import './App.css'
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
 
   return (
     <>
+      <GazePortrait width={200} height={200} className="profile-pic"/>
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />

@@ -40,3 +40,13 @@
 .read-the-docs {
   color: #888;
 }
+
+.profile-pic {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 3px solid #fff;
+  transition: transform 0.2s;
+}
+
+.profile-pic:hover {
+  transform: scale(1.05);
+}
