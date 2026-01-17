@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 interface GazePortraitProps {
   videoSrc?: string;
@@ -22,6 +22,8 @@ export default function GazePortrait({
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFrameTimeRef = useRef(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const [showGlasses, setShowGlasses] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -30,6 +32,9 @@ export default function GazePortrait({
     if (!video || !container) return;
 
     const handleMouseMove = (e: MouseEvent) => {
+      // Don't track when hovering directly over the portrait
+      if (isHovering) return;
+      
       const now = performance.now();
       if (now - lastFrameTimeRef.current < 1000 / fps) {
         return;
@@ -71,18 +76,55 @@ export default function GazePortrait({
         parent.removeEventListener('mousemove', handleMouseMove);
       };
     }
-  }, [xSteps, ySteps, fps]);
+  }, [xSteps, ySteps, fps, isHovering]);
+
+  // Set to center frame (facing forward) when hovering
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isHovering) {
+      // Center frame is middle of the grid - looking straight ahead
+      const centerXIndex = Math.floor(xSteps / 2);
+      const centerYIndex = Math.floor(ySteps / 2);
+      const centerFrameIndex = centerYIndex * xSteps + centerXIndex;
+      const centerFrameTime = centerFrameIndex / fps;
+
+      if (video.readyState >= 2) {
+        video.currentTime = centerFrameTime;
+      }
+    }
+  }, [isHovering, xSteps, ySteps, fps]);
+
+  const handleMouseDown = () => {
+    setShowGlasses(true);
+  };
+
+  const handleMouseUp = () => {
+    setShowGlasses(false);
+  };
 
   return (
     <div
       ref={containerRef}
       className={`gaze-portrait-container ${className}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={(e) => {
+        setIsHovering(false);
+        setShowGlasses(false); // Remove glasses if mouse leaves while holding
+      }}
       style={{
         width: `${width}px`,
         height: `${height}px`,
         position: 'relative',
         overflow: 'hidden',
         borderRadius: '50%',
+        cursor: isHovering ? 'pointer' : 'default',
+        transition: 'transform 0.2s ease',
+        transform: isHovering ? 'scale(1.05)' : 'scale(1)',
       }}
     >
       <video
@@ -97,6 +139,57 @@ export default function GazePortrait({
           objectFit: 'cover',
         }}
       />
+      
+      {/* Glasses overlay - only while mouse is pressed down */}
+      {showGlasses && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '35%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: `${width * 0.5}px`,
+            pointerEvents: 'none',
+            animation: 'slideDown 0.3s ease-out',
+          }}
+        >
+          😎
+        </div>
+      )}
+      
+      {/* Hover hint */}
+      {isHovering && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0,0,0,0.8)',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            whiteSpace: 'nowrap',
+            pointerEvents: 'none',
+          }}
+        >
+          Hold to see me cool 😎
+        </div>
+      )}
+      
+      <style>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -100%);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+          }
+        }
+      `}</style>
     </div>
   );
 }
