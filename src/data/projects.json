@@ -1,0 +1,20 @@
+[
+    {
+      "imageSrc": "/images/HeatFinder.png",
+      "title": "First feature",
+      "description": "This is the first feature.",
+      "tryMeLink": "/demo/first"
+    },
+    {
+      "imageSrc": "/images/HeatFinder.png",
+      "title": "Second feature",
+      "description": "This is the second feature.",
+      "tryMeLink": "/demo/second"
+    },
+    {
+      "imageSrc": "/images/HeatFinder.png",
+      "title": "Third feature",
+      "description": "This is the third feature.",
+      "tryMeLink": "/demo/third"
+    }
+  ]  
