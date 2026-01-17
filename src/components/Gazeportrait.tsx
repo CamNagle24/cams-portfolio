@@ -36,13 +36,18 @@ export default function GazePortrait({
       }
       lastFrameTimeRef.current = now;
 
-      const rect = container.getBoundingClientRect();
+      // Get the outer container (parent element) bounds
+      const parent = container.parentElement;
+      if (!parent) return;
+      
+      const rect = parent.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
       const deltaX = e.clientX - centerX;
       const deltaY = e.clientY - centerY;
 
+      // Normalize based on the parent container size
       const normalizedX = Math.max(-1, Math.min(1, deltaX / (rect.width / 2)));
       const normalizedY = Math.max(-1, Math.min(1, deltaY / (rect.height / 2)));
 
@@ -57,11 +62,15 @@ export default function GazePortrait({
       }
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-    };
+    // Listen on parent element instead of document
+    const parent = container.parentElement;
+    if (parent) {
+      parent.addEventListener('mousemove', handleMouseMove);
+      
+      return () => {
+        parent.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
   }, [xSteps, ySteps, fps]);
 
   return (
